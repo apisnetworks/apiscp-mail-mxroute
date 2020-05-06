@@ -13,7 +13,7 @@
 	use Module\Provider\Contracts\ProviderInterface;
 
 	// stub to make apnscp happy
-	class Module extends \Email_Module implements ProviderInterface
+	class Module extends \Opcenter\Mail\Providers\Null\Module implements ProviderInterface
 	{
 		protected const DKIM_RECORD = 'x._domainkey';
 		/**
