@@ -10,10 +10,8 @@
 
 	namespace Opcenter\Mail\Providers\Mxroute;
 
-	use Module\Provider\Contracts\ProviderInterface;
-
 	// stub to make apnscp happy
-	class Module extends \Opcenter\Mail\Providers\Null\Module implements ProviderInterface
+	class Module extends \Opcenter\Mail\Providers\Null\Module
 	{
 		protected const DKIM_RECORD = 'x._domainkey';
 		/**
@@ -27,6 +25,12 @@
 		{
 			$ttl = $this->dns_get_default('ttl');
 
+			$server = $this->getServiceValue('mail', 'key', MAIL_PROVIDER_KEY);
+
+			if (!$server) {
+				fatal("MXRoute server unset?");
+			}
+
 			$records = [
 				new \Opcenter\Dns\Record($domain, [
 					'name'      => $subdomain,
@@ -35,16 +39,16 @@
 					'parameter' => 'v=spf1 include:mxlogin.com -all'
 				]),
 				new \Opcenter\Dns\Record($domain,
-					['name' => $subdomain, 'ttl' => $ttl, 'rr' => 'MX', 'parameter' => '10 arrow.mxrouting.net.']),
+					['name' => $subdomain, 'ttl' => $ttl, 'rr' => 'MX', 'parameter' => "10 ${server}.mxrouting.net."]),
 				new \Opcenter\Dns\Record($domain,
-					['name' => $subdomain, 'ttl' => $ttl, 'rr' => 'MX', 'parameter' => '20 arrow-relay.mxrouting.net.']),
+					['name' => $subdomain, 'ttl' => $ttl, 'rr' => 'MX', 'parameter' => "20 {$server}-relay.mxrouting.net."]),
 				new \Opcenter\Dns\Record($domain,
-					['name' => rtrim("mail.${subdomain}",'.'), 'ttl' => $ttl, 'rr' => 'CNAME', 'parameter' => 'arrow.mxrouting.net.']),
+					['name' => rtrim("mail.${subdomain}",'.'), 'ttl' => $ttl, 'rr' => 'CNAME', 'parameter' => "${server}.mxrouting.net."]),
 				new \Opcenter\Dns\Record($domain, [
 					'name'      => rtrim("webmail.${subdomain}", '.'),
 					'ttl'       => $ttl,
 					'rr'        => 'CNAME',
-					'parameter' => 'arrow.mxrouting.net.'
+					'parameter' => "${server}.mxrouting.net."
 				]),
 			];
 			$hostname = self::DKIM_RECORD . "." . ltrim("${subdomain}.${domain}", '.');

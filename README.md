@@ -4,8 +4,12 @@ This is a drop-in provider for [ApisCP](https://apiscp.com) to enable mail suppo
 
 ## Configuring
 
+A server name is required to configure MXRoute. Servers are assigned to each account and 
+[provided at sign-up](https://community.mxroute.com/t/how-do-i-use-custom-hostnames-for-pop-imap-smtp-and-webmail/70/2) with MXRoute. For example,
+"ghost" and "arrow" are two known MXRoute servers. Yours may be different. Substitute *SERVER* with your server name.
+
 ```bash
-EditDomain -c mail,provider=mxroute domain.com
+EditDomain -c mail,provider=mxroute -c mail,key=SERVER domain.com
 ```
 
 ## Components
