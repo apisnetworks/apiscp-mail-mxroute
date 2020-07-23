@@ -26,11 +26,11 @@
 		public function valid(ConfigurationContext $ctx, &$var): bool
 		{
 			if (\is_array($var)) {
-				return error("key must be scalar");
+				return error('key must be scalar');
 			}
 
 			if (!$var) {
-				return error("MXRoute provider requires a key, which is server name");
+				return error('MXRoute provider requires a key, which is server name');
 			}
 
 			$ip = \Net_Gethost::gethostbyname_t("${var}.mxrouting.net", 5000);

@@ -28,8 +28,13 @@
 			$server = $this->getServiceValue('mail', 'key', MAIL_PROVIDER_KEY);
 
 			if (!$server) {
-				fatal("MXRoute server unset?");
+				fatal('MXRoute server unset?');
 			}
+
+			// post-crossbox change in URL layout
+			$mxserver = silence(static function () use ($server) {
+				return (new \Net_Gethost(5000))->lookup("${server}.mxrouting.net", DNS_TXT);
+			}) ? "mxrouting.net" : "mxlogin.com";
 
 			$records = [
 				new \Opcenter\Dns\Record($domain, [
@@ -39,19 +44,19 @@
 					'parameter' => 'v=spf1 include:mxlogin.com -all'
 				]),
 				new \Opcenter\Dns\Record($domain,
-					['name' => $subdomain, 'ttl' => $ttl, 'rr' => 'MX', 'parameter' => "10 ${server}.mxrouting.net."]),
+					['name' => $subdomain, 'ttl' => $ttl, 'rr' => 'MX', 'parameter' => "10 ${server}.${mxserver}."]),
 				new \Opcenter\Dns\Record($domain,
-					['name' => $subdomain, 'ttl' => $ttl, 'rr' => 'MX', 'parameter' => "20 {$server}-relay.mxrouting.net."]),
+					['name' => $subdomain, 'ttl' => $ttl, 'rr' => 'MX', 'parameter' => "20 {$server}-relay.${mxserver}."]),
 				new \Opcenter\Dns\Record($domain,
-					['name' => rtrim("mail.${subdomain}",'.'), 'ttl' => $ttl, 'rr' => 'CNAME', 'parameter' => "${server}.mxrouting.net."]),
+					['name' => rtrim("mail.${subdomain}",'.'), 'ttl' => $ttl, 'rr' => 'CNAME', 'parameter' => "${server}.${mxserver}."]),
 				new \Opcenter\Dns\Record($domain, [
 					'name'      => rtrim("webmail.${subdomain}", '.'),
 					'ttl'       => $ttl,
 					'rr'        => 'CNAME',
-					'parameter' => "${server}.mxrouting.net."
+					'parameter' => "${server}.${mxserver}."
 				]),
 			];
-			$hostname = self::DKIM_RECORD . "." . ltrim("${subdomain}.${domain}", '.');
+			$hostname = self::DKIM_RECORD . '.' . ltrim("${subdomain}.${domain}", '.');
 			$parameter = silence(static function () use ($hostname) {
 				return (new \Net_Gethost(5000))->lookup($hostname, DNS_TXT);
 			});
