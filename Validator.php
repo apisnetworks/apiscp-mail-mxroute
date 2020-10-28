@@ -20,7 +20,7 @@
 		 * Validate service value
 		 *
 		 * @param ConfigurationContext $ctx
-		 * @param                      $var service value
+		 * @param string               $var service value
 		 * @return bool
 		 */
 		public function valid(ConfigurationContext $ctx, &$var): bool
@@ -32,11 +32,10 @@
 			if (!$var) {
 				return error('MXRoute provider requires a key, which is server name');
 			}
-
-			$ip = \Net_Gethost::gethostbyname_t("${var}.mxrouting.net", 5000);
-			if (!$ip) {
-				return error("IP lookup failed for ${var}.mxrouting.net failed - is the server name '$var' correct?");
+			if (null === (new Api())->getCanonicalName($var)) {
+				return error("Lookup failed for ${var} - is the server name '$var' correct?");
 			}
+
 			return true;
 		}
 	}
